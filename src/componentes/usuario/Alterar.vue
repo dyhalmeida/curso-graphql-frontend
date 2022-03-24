@@ -60,6 +60,7 @@
 
 <script>
 import Erros from '../comum/Erros'
+import gql from 'graphql-tag'
 
 export default {
     components: { Erros },
@@ -90,7 +91,16 @@ export default {
             // Implementar
         },
         obterPerfis() {
-            // implementar
+            this.$api.query({
+                query: gql`{ profiles { id role }}`
+            })
+            .then(response => {
+                return response.data.profiles.map(profile => ({ id: profile.id, rotulo: profile.role }))
+            })
+            .then(profiles => {
+                this.perfis = [...profiles]
+                this.error = null
+            }).catch(e => this.erros = e)
         }
     }
 }
