@@ -26,9 +26,9 @@
                         <v-text-field label="ID" readonly
                             v-model="dados.id" />
                         <v-text-field label="Nome" readonly
-                            v-model="dados.nome" />
+                            v-model="dados.name" />
                         <v-text-field label="Rótulo" readonly
-                            v-model="dados.rotulo" />
+                            v-model="dados.role" />
                     </template>
                 </v-layout>
             </v-flex>
@@ -38,6 +38,7 @@
 
 <script>
 import Erros from '../comum/Erros'
+import gql from 'graphql-tag'
 
 export default {
     components: { Erros },
@@ -50,7 +51,30 @@ export default {
     },
     methods: {
         novoPerfil() {
-            // implementar
+            this.$api.mutate({
+                mutation: gql`
+                    mutation(
+                        $name: String!
+                        $role: String!
+                    ){
+                        createProfile(
+                            data: {
+                                name: $name
+                                role: $role
+                            }
+                        ) {
+                            id name role
+                        }
+                    }
+                `,
+                variables: {
+                    name: this.perfil.nome,
+                    role: this.perfil.rotulo
+                }
+            }).then(response => {
+                this.dados = response.data.createProfile
+                this.erros = null
+            }).catch(e => this.erros = e)
         }
     }
 }
