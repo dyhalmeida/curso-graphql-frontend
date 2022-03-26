@@ -48,7 +48,8 @@ export default {
             this.$api.query({
                 query: gql`
                     { profiles { id name role }}
-                `
+                `,
+                fetchPolicy: 'network-only'
             }).then(response => {
                 this.perfis = response.data.profiles
                 this.erros = null
