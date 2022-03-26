@@ -28,7 +28,7 @@
                         <v-text-field label="ID" readonly
                             v-model="dados.id" />
                         <v-text-field label="Nome" readonly
-                            v-model="dados.nome" />
+                            v-model="dados.name" />
                         <v-text-field label="E-mail" readonly
                             v-model="dados.email" />
                         <v-text-field label="Perfis" readonly
@@ -42,6 +42,7 @@
 
 <script>
 import Erros from '../comum/Erros'
+import gql from 'graphql-tag'
 
 export default {
     components: { Erros },
@@ -54,13 +55,44 @@ export default {
     },
     computed: {
         perfis() {
-            return this.dados && this.dados.perfis &&
-                this.dados.perfis.map(p => p.nome).join(',')
+            return this.dados && this.dados.profiles &&
+                this.dados.profiles.map(p => p.role).join(',')
         }
     },
     methods: {
         registrar() {
-            // implementar
+            this.$api.mutate({
+                mutation: gql`
+                    mutation (
+                        $name: String!
+                        $email: String!
+                        $age: Int!
+                        $password: String!
+                    ) {
+                        createPublicUser(
+                            data: {
+                                name: $name,
+                                email: $email,
+                                age: $age,
+                                password: $password
+                            }
+                        ) {
+                            id name email profiles { role }
+                        }
+                    }
+                
+                `,
+               variables: {
+                name: this.usuario.nome,
+                email: this.usuario.email,
+                age: 30,
+                password: this.usuario.senha
+                }
+            }).then(response => {
+                    this.dados = response.data.createPublicUser
+                    this.usuario = {}
+                    this.erros = null
+            }).catch(e => this.erros = e)
         }
     }
 }
