@@ -17,8 +17,8 @@
                     hide-actions class="elevation-1">
                     <template slot="items" slot-scope="props">
                         <td>{{ props.item.id }}</td>
-                        <td>{{ props.item.nome }}</td>
-                        <td>{{ props.item.rotulo }}</td>
+                        <td>{{ props.item.name }}</td>
+                        <td>{{ props.item.role }}</td>
                     </template>
                 </v-data-table>
             </v-flex>
@@ -28,6 +28,7 @@
 
 <script>
 import Erros from '../comum/Erros'
+import gql from 'graphql-tag'
 
 export default {
     components: { Erros },
@@ -44,7 +45,14 @@ export default {
     },
     methods: {
         obterPerfis() {
-            // implementar
+            this.$api.query({
+                query: gql`
+                    { profiles { id name role }}
+                `
+            }).then(response => {
+                this.perfis = response.data.profiles
+                this.erros = null
+            }).catch(e => this.erros = e)
         }
     }
 }
