@@ -27,7 +27,7 @@
                         <v-text-field label="ID" readonly
                             v-model="dados.id" />
                         <v-text-field label="Nome" readonly
-                            v-model="dados.nome" />
+                            v-model="dados.name" />
                         <v-text-field label="E-mail" readonly
                             v-model="dados.email" />
                     </template>
@@ -39,6 +39,7 @@
 
 <script>
 import Erros from '../comum/Erros'
+import gql from 'graphql-tag'
 
 export default {
     components: { Erros },
@@ -51,7 +52,33 @@ export default {
     },
     methods: {
         excluirUsuario() {
-            // implementar
+            this.$api.mutate({
+                mutation: gql`
+                    mutation(
+                        $id: ID
+                        $email: String
+                    ){
+                        deleteUser(
+                            filters: {
+                                id: $id
+                                email: $email
+                            }
+                        ){
+                            id name email
+                        }
+                    }
+                `,
+                variables: {
+                    id: this.filtro.id,
+                    email: this.filtro.email
+                }
+            }).then(response => {
+                this.dados = response.data.deleteUser
+                this.filtro = {}
+                this.erros = null
+            }).catch(e => {
+                this.erros = e
+            })
         }
     }
 }
