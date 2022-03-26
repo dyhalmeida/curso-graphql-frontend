@@ -39,7 +39,7 @@
                         <v-text-field label="ID" readonly
                             v-model="dados.id" />
                         <v-text-field label="Nome" readonly
-                            v-model="dados.nome" />
+                            v-model="dados.name" />
                         <v-text-field label="Email" readonly
                             v-model="dados.email" />
                         <v-text-field label="Perfis" readonly
@@ -67,12 +67,12 @@ export default {
     },
     computed: {
         perfisRotulos() {
-            return this.dados && this.dados.perfis &&
-                this.dados.perfis.map(p => p.rotulo).join(', ')
+            return this.dados && this.dados.profiles &&
+                this.dados.profiles.map(p => p.role).join(', ')
         },
         perfisSelecionados() {
-            if(this.usuario.perfis) {
-                return this.usuario.perfis.map(id => ({ id }))
+            if(this.usuario.profiles) {
+                return this.usuario.profiles.map(id => ({ id }))
             } else {
                 return null
             }
@@ -80,7 +80,42 @@ export default {
     },
     methods: {
         novoUsuario() {
-            // implementar
+            this.$api.mutate({
+                mutation: gql`
+                    mutation(
+                        $name: String!
+                        $email: String!
+                        $age: Int!
+                        $password: String!
+                        $profiles: [ProfileFilters]
+                    ) {
+                        createUser(
+                          data: {
+                            name: $name
+                            email: $email
+                            age: $age
+                            password: $password
+                            profiles: $profiles
+                          }
+                        ) {
+                            id name email profiles { role }
+                        }
+                    }
+                `,
+                variables: {
+                    name: this.usuario.nome,
+                    email: this.usuario.email,
+                    age: 30,
+                    password: this.usuario.senha,
+                    profiles: this.perfisSelecionados
+                }
+            }).then(response => {
+                this.dados = response.data.createUser
+                this.usuario = {}
+                this.erros = null
+            }).catch(e => {
+                this.erros = e
+            })
         },
         obterPerfis() {
             this.$api.query({
