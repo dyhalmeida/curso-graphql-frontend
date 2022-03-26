@@ -26,7 +26,7 @@
                         <v-text-field label="ID" readonly
                             v-model="dados.id" />
                         <v-text-field label="Nome" readonly
-                            v-model="dados.nome" />
+                            v-model="dados.name" />
                         <v-text-field label="E-mail" readonly
                             v-model="dados.email" />
                         <v-text-field label="Token" readonly
@@ -41,6 +41,7 @@
 <script>
 import { mapActions } from 'vuex'
 import Erros from '../comum/Erros'
+import gql from 'graphql-tag'
 
 export default {
     components: { Erros },
@@ -53,14 +54,40 @@ export default {
     },
     computed: {
         perfis() {
-            return this.dados && this.dados.perfis &&
-                this.dados.perfis.map(p => p.nome).join(',')
+            return this.dados && this.dados.profiles &&
+                this.dados.profiles.map(p => p.role).join(',')
         }
     },
     methods: {
         ...mapActions(['setUsuario']),
         login() {
-            // implementar
+            this.$api.query({
+                query: gql`
+                    query(
+                        $email: String!
+                        $password: String!
+                    ) {
+                        login(
+                            data: {
+                                email: $email
+                                password: $password
+                            }
+                        ) {
+                            id name email token profiles { role  }
+                        }
+                    }
+                `,
+                variables: {
+                    email: this.usuario.email,
+                    password: this.usuario.senha
+                }
+            }).then(response => {
+                console.log(response)
+                this.dados = response.data.login
+                this.setUsuario(this.dados)
+                this.usuario = {}
+                this.erros = null
+            }).catch(e => this.erros = e)
         }
     }
 }

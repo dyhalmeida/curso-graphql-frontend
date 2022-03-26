@@ -4,7 +4,7 @@
             <v-flex>
                 <span class="ml-3 headline"><strong>Nome: </strong></span>
                 <span class="headline blue--text text--darken-2">
-                    {{ usuario.nome }}</span>
+                    {{ usuario.name }}</span>
 
                 <span class="ml-3 headline"><strong>Email: </strong></span>
                 <span class="headline blue--text text--darken-2">
@@ -33,8 +33,8 @@ export default {
     computed: {
         ...mapGetters(['usuario']),
         perfis() {
-            if(!this.usuario && !this.usuario.perfis) return null
-            return this.usuario.perfis.map(p => p.nome).join(', ')
+            if(!this.usuario && !this.usuario.profiles) return null
+            return this.usuario.profiles.map(p => p.role).join(', ')
         }
     },
     methods: mapActions(['setUsuario'])
