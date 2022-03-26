@@ -27,9 +27,9 @@
                         <v-text-field label="ID" readonly
                             v-model="dados.id" />
                         <v-text-field label="Nome" readonly
-                            v-model="dados.nome" />
+                            v-model="dados.name" />
                         <v-text-field label="Rótulo" readonly
-                            v-model="dados.rotulo" />
+                            v-model="dados.role" />
                     </template>
                 </v-layout>
             </v-flex>
@@ -39,6 +39,7 @@
 
 <script>
 import Erros from '../comum/Erros'
+import gql from 'graphql-tag'
 
 export default {
     components: { Erros },
@@ -51,7 +52,30 @@ export default {
     },
     methods: {
         excluirPerfil() {
-            // implementar
+            this.$api.mutate({
+                mutation: gql`
+                    mutation(
+                        $id: ID
+                        $name: String
+                    ){
+                        deleteProfile(
+                            filters: {
+                                id: $id
+                                name: $name
+                            }
+                        ){
+                            id name role
+                        }
+                    }
+                `,
+                variables: {
+                    id: this.filtro.id,
+                    name: this.filtro.nome
+                }
+            }).then(response => {
+                this.dados = response.data.deleteProfile
+                this.erros = null
+            }).catch(e => this.erros = e)
         }
     }
 }
