@@ -17,10 +17,10 @@
                     hide-actions class="elevation-1">
                     <template slot="items" slot-scope="props">
                         <td>{{ props.item.id }}</td>
-                        <td>{{ props.item.nome }}</td>
+                        <td>{{ props.item.name }}</td>
                         <td>{{ props.item.email }}</td>
-                        <td>{{ props.item.perfis
-                                .map(p => p.nome)
+                        <td>{{ props.item.profiles
+                                .map(p => p.role)
                                 .join(', ') }}</td>
                     </template>
                 </v-data-table>
@@ -31,6 +31,7 @@
 
 <script>
 import Erros from '../comum/Erros'
+import gql from 'graphql-tag'
 
 export default {
     components: { Erros },
@@ -48,7 +49,22 @@ export default {
     },
     methods: {
         obterUsuarios() {
-            // 
+            this.$api.query({
+                query: gql`
+                    query {
+                        users {
+                            id name email profiles { role }
+                        }
+                    }
+                `,
+                fetchPolicy: 'network-only'
+            }).then(response => {
+                this.usuarios = response.data.users
+                this.erros = null
+            }).catch(e => {
+                this.usuarios = []
+                this.erros = e
+            })
         }
     }
 }
